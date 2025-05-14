@@ -3,6 +3,7 @@ import { Server } from "@modelcontextprotocol/sdk/server/index.js";
 import { z } from "zod";
 import { SSEServerTransport } from "@modelcontextprotocol/sdk/server/sse.js";
 import express from "express";
+import cors from "express-cors";
 import {
   isInitializeRequest,
   CallToolRequestSchema,
@@ -12,6 +13,9 @@ import {
 } from "@modelcontextprotocol/sdk/types.js";
 
 import { Pool } from "pg";
+
+
+// Add before defining routes
 
 const server = new Server(
   {
@@ -34,6 +38,9 @@ const databaseUrl = args[0];
 const resourceBaseUrl = new URL(databaseUrl);
 resourceBaseUrl.protocol = "postgres:";
 resourceBaseUrl.password = "";
+
+
+
 const pool = new Pool({
   connectionString: databaseUrl,
 });
@@ -127,6 +134,14 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
 
 const app = express();
 
+app.use(
+  cors({
+    allowedOrigins: ["*"], // Adjust for production
+    headers: ["Content-Type"],
+  })
+);
+
+
 const transports = new Map();
 
 app.get("/sse", (_, res) => {
@@ -168,6 +183,6 @@ app.get("/", (_, res) => {
   res.send("Healthy");
 });
 
-app.listen(45000, "localhost", () => {
-  console.log("Server started on port 3000");
+app.listen(45000, "0.0.0.0", () => {
+  console.log("Server started on port 45000");
 });
